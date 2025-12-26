@@ -27,7 +27,13 @@
 
 <nav class="navbar navbar-dark bg-dark px-4">
     <span class="navbar-brand">📝 Task Tracker</span>
-    <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm">Logout</a>
+    <form method="post" action="{% url 'logout' %}" class="d-inline">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-outline-light btn-sm">
+        Logout
+    </button>
+</form>
+
 </nav>
 
 <div class="container mt-4">
