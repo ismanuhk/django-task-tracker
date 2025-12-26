@@ -1,6 +1,7 @@
 from django.shortcuts import render
-from .models import Student
-from .forms import StudentForm
+from .models import Task
+from .forms import TaskForm
+
 from django.shortcuts import redirect
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -8,48 +9,44 @@ from django.contrib.auth.decorators import login_required
 
 
 @login_required
-def student_list(request):
-    students = Student.objects.filter(user=request.user)
-    return render(request, 'students/student_list.html', {'students': students})
+def task_list(request):
+    tasks = Task.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'students/task_list.html', {'tasks': tasks})
+
 
 
 
 
 @login_required
-def add_student(request):
+def add_task(request):
     if request.method == 'POST':
-        form = StudentForm(request.POST)
+        form = TaskForm(request.POST)
         if form.is_valid():
-            student = form.save(commit=False)
-            student.user = request.user   # 🔥 THIS LINE
-            student.save()
-            return redirect('student_list')
+            task = form.save(commit=False)
+            task.user = request.user
+            task.save()
+            return redirect('task_list')
     else:
-        form = StudentForm()
+        form = TaskForm()
 
-    return render(request, 'students/add_student.html', {'form': form})
+    return render(request, 'students/add_task.html', {'form': form})
+
 
 
 @login_required
-def edit_student(request, id):
-    student = get_object_or_404(Student, id=id, user=request.user)
+def toggle_task(request, id):
+    task = get_object_or_404(Task, id=id, user=request.user)
+    task.completed = not task.completed
+    task.save()
+    return redirect('task_list')
 
-    if request.method == 'POST':
-        form = StudentForm(request.POST, instance=student)
-        if form.is_valid():
-            form.save()
-            return redirect('student_list')
-    else:
-        form = StudentForm(instance=student)
-
-    return render(request, 'students/edit_student.html', {'form': form})
 
 
 @login_required
-def delete_student(request, id):
-    student = get_object_or_404(Student, id=id, user=request.user)
-    student.delete()
-    return redirect('student_list')
+def delete_task(request, id):
+    task = get_object_or_404(Task, id=id, user=request.user)
+    task.delete()
+    return redirect('task_list')
 
 
 
